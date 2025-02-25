@@ -1944,23 +1944,22 @@ var centre2 = centre;
 
 // build/dev/javascript/proto/proto.mjs
 function main() {
-  let styles = toList([]);
-  let $ = element2(
+  let styles = toList([["font-size", "3rem"]]);
+  let app = element2(
     centre2(
       toList([style(styles)]),
-      h1(toList([]), toList([text("sleeeeeeeeeeeeeeepy")]))
+      h1(toList([]), toList([text("sadness")]))
     )
   );
-  let br = element2(h1(toList([]), toList([text("Yoo")])));
-  let $1 = start2(br, "#app", void 0);
-  if (!$1.isOk()) {
+  let $ = start2(app, "#app", void 0);
+  if (!$.isOk()) {
     throw makeError(
       "let_assert",
       "proto",
-      17,
+      16,
       "main",
       "Pattern match failed, no pattern matched the value.",
-      { value: $1 }
+      { value: $ }
     );
   }
   return void 0;
