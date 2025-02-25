@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import dot_env
 import dot_env/env
 import gleam/erlang/process
@@ -29,4 +30,25 @@ pub fn main() {
   // The web server runs in new Erlang process, so put this one to sleep while
   // it works concurrently.
   process.sleep_forever()
+=======
+import lustre
+import lustre/attribute
+import lustre/element
+import lustre/element/html
+import lustre/ui
+
+pub fn main() {
+  let styles = []
+  let _app =
+    lustre.element(ui.centre(
+      [attribute.style(styles)],
+      html.h1([], [element.text("sleeeeeeeeeeeeeeepy")]),
+    ))
+
+  let br = lustre.element(html.h1([], [element.text("Yoo")]))
+
+  let assert Ok(_) = lustre.start(br, "#app", Nil)
+
+  Nil
+>>>>>>> 3d660ff (client init)
 }
