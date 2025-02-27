@@ -2,7 +2,7 @@
 var CustomType = class {
   withFields(fields) {
     let properties = Object.keys(this).map(
-      (label2) => label2 in fields ? fields[label2] : this[label2]
+      (label) => label in fields ? fields[label] : this[label]
     );
     return new this.constructor(...properties);
   }
@@ -168,17 +168,6 @@ function structurallyCompatibleObjects(a, b) {
   if (nonstructural.some((c) => a instanceof c))
     return false;
   return a.constructor === b.constructor;
-}
-function makeError(variant, module, line, fn, message, extra) {
-  let error = new globalThis.Error(message);
-  error.gleam_error = variant;
-  error.module = module;
-  error.line = line;
-  error.function = fn;
-  error.fn = fn;
-  for (let k in extra)
-    error[k] = extra[k];
-  return error;
 }
 
 // build/dev/javascript/gleam_stdlib/gleam/option.mjs
@@ -1076,11 +1065,11 @@ var Text = class extends CustomType {
   }
 };
 var Element = class extends CustomType {
-  constructor(key, namespace, tag2, attrs, children2, self_closing, void$) {
+  constructor(key, namespace, tag, attrs, children2, self_closing, void$) {
     super();
     this.key = key;
     this.namespace = namespace;
-    this.tag = tag2;
+    this.tag = tag;
     this.attrs = attrs;
     this.children = children2;
     this.self_closing = self_closing;
@@ -1162,60 +1151,43 @@ function handlers(element3) {
 function attribute(name, value) {
   return new Attribute(name, identity(value), false);
 }
-function style(properties) {
-  return attribute(
-    "style",
-    fold(
-      properties,
-      "",
-      (styles, _use1) => {
-        let name$1 = _use1[0];
-        let value$1 = _use1[1];
-        return styles + name$1 + ":" + value$1 + ";";
-      }
-    )
-  );
-}
-function class$(name) {
-  return attribute("class", name);
+function id(name) {
+  return attribute("id", name);
 }
 
 // build/dev/javascript/lustre/lustre/element.mjs
-function element(tag2, attrs, children2) {
-  if (tag2 === "area") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "base") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "br") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "col") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "embed") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "hr") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "img") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "input") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "link") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "meta") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "param") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "source") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "track") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
-  } else if (tag2 === "wbr") {
-    return new Element("", "", tag2, attrs, toList([]), false, true);
+function element(tag, attrs, children2) {
+  if (tag === "area") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "base") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "br") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "col") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "embed") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "hr") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "img") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "input") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "link") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "meta") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "param") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "source") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "track") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
+  } else if (tag === "wbr") {
+    return new Element("", "", tag, attrs, toList([]), false, true);
   } else {
-    return new Element("", "", tag2, attrs, children2, false, false);
+    return new Element("", "", tag, attrs, children2, false, false);
   }
-}
-function text(content) {
-  return new Text(content);
 }
 
 // build/dev/javascript/gleam_stdlib/gleam/set.mjs
@@ -1332,9 +1304,9 @@ if (globalThis.customElements && !globalThis.customElements.get("lustre-fragment
 }
 function morph(prev, next, dispatch) {
   let out;
-  let stack2 = [{ prev, next, parent: prev.parentNode }];
-  while (stack2.length) {
-    let { prev: prev2, next: next2, parent } = stack2.pop();
+  let stack = [{ prev, next, parent: prev.parentNode }];
+  while (stack.length) {
+    let { prev: prev2, next: next2, parent } = stack.pop();
     while (next2.subtree !== void 0)
       next2 = next2.subtree();
     if (next2.content !== void 0) {
@@ -1356,7 +1328,7 @@ function morph(prev, next, dispatch) {
         prev: prev2,
         next: next2,
         dispatch,
-        stack: stack2
+        stack
       });
       if (!prev2) {
         parent.appendChild(created);
@@ -1368,7 +1340,7 @@ function morph(prev, next, dispatch) {
   }
   return out;
 }
-function createElementNode({ prev, next, dispatch, stack: stack2 }) {
+function createElementNode({ prev, next, dispatch, stack }) {
   const namespace = next.namespace || "http://www.w3.org/1999/xhtml";
   const canMorph = prev && prev.nodeType === Node.ELEMENT_NODE && prev.localName === next.tag && prev.namespaceURI === (next.namespace || "http://www.w3.org/1999/xhtml");
   const el = canMorph ? prev : namespace ? document.createElementNS(namespace, next.tag) : document.createElement(next.tag);
@@ -1490,7 +1462,7 @@ function createElementNode({ prev, next, dispatch, stack: stack2 }) {
         prevChild,
         child,
         el,
-        stack2,
+        stack,
         incomingKeyedChildren,
         keyedChildren,
         seenKeys
@@ -1498,7 +1470,7 @@ function createElementNode({ prev, next, dispatch, stack: stack2 }) {
     }
   } else {
     for (const child of children(next)) {
-      stack2.unshift({ prev: prevChild, next: child, parent: el });
+      stack.unshift({ prev: prevChild, next: child, parent: el });
       prevChild = prevChild?.nextSibling;
     }
   }
@@ -1525,7 +1497,7 @@ function lustreGenericEventHandler(event) {
 }
 function lustreServerEventHandler(event) {
   const el = event.currentTarget;
-  const tag2 = el.getAttribute(`data-lustre-on-${event.type}`);
+  const tag = el.getAttribute(`data-lustre-on-${event.type}`);
   const data = JSON.parse(el.getAttribute("data-lustre-data") || "{}");
   const include = JSON.parse(el.getAttribute("data-lustre-include") || "[]");
   switch (event.type) {
@@ -1535,7 +1507,7 @@ function lustreServerEventHandler(event) {
       break;
   }
   return {
-    tag: tag2,
+    tag,
     data: include.reduce(
       (data2, property) => {
         const path = property.split(".");
@@ -1565,41 +1537,41 @@ function getKeyedChildren(el) {
   }
   return keyedChildren;
 }
-function diffKeyedChild(prevChild, child, el, stack2, incomingKeyedChildren, keyedChildren, seenKeys) {
+function diffKeyedChild(prevChild, child, el, stack, incomingKeyedChildren, keyedChildren, seenKeys) {
   while (prevChild && !incomingKeyedChildren.has(prevChild.getAttribute("data-lustre-key"))) {
     const nextChild = prevChild.nextSibling;
     el.removeChild(prevChild);
     prevChild = nextChild;
   }
   if (keyedChildren.size === 0) {
-    stack2.unshift({ prev: prevChild, next: child, parent: el });
+    stack.unshift({ prev: prevChild, next: child, parent: el });
     prevChild = prevChild?.nextSibling;
     return prevChild;
   }
   if (seenKeys.has(child.key)) {
     console.warn(`Duplicate key found in Lustre vnode: ${child.key}`);
-    stack2.unshift({ prev: null, next: child, parent: el });
+    stack.unshift({ prev: null, next: child, parent: el });
     return prevChild;
   }
   seenKeys.add(child.key);
   const keyedChild = keyedChildren.get(child.key);
   if (!keyedChild && !prevChild) {
-    stack2.unshift({ prev: null, next: child, parent: el });
+    stack.unshift({ prev: null, next: child, parent: el });
     return prevChild;
   }
   if (!keyedChild && prevChild !== null) {
     const placeholder = document.createTextNode("");
     el.insertBefore(placeholder, prevChild);
-    stack2.unshift({ prev: placeholder, next: child, parent: el });
+    stack.unshift({ prev: placeholder, next: child, parent: el });
     return prevChild;
   }
   if (!keyedChild || keyedChild === prevChild) {
-    stack2.unshift({ prev: prevChild, next: child, parent: el });
+    stack.unshift({ prev: prevChild, next: child, parent: el });
     prevChild = prevChild?.nextSibling;
     return prevChild;
   }
   el.insertBefore(keyedChild, prevChild);
-  stack2.unshift({ prev: keyedChild, next: child, parent: el });
+  stack.unshift({ prev: keyedChild, next: child, parent: el });
   return prevChild;
 }
 function* children(element3) {
@@ -1921,49 +1893,23 @@ function start2(app, selector, flags) {
 }
 
 // build/dev/javascript/lustre/lustre/element/html.mjs
-function h1(attrs, children2) {
-  return element("h1", attrs, children2);
+function main(attrs, children2) {
+  return element("main", attrs, children2);
 }
-function div(attrs, children2) {
-  return element("div", attrs, children2);
+function canvas(attrs) {
+  return element("canvas", attrs, toList([]));
 }
-
-// build/dev/javascript/lustre_ui/lustre/ui/centre.mjs
-function of(element3, attributes, children2) {
-  return element3(
-    prepend(class$("lustre-ui-centre"), attributes),
-    toList([children2])
-  );
-}
-function centre(attributes, children2) {
-  return of(div, attributes, children2);
-}
-
-// build/dev/javascript/lustre_ui/lustre/ui.mjs
-var centre2 = centre;
 
 // build/dev/javascript/proto/proto.mjs
-function main() {
-  let styles = toList([["font-size", "3rem"]]);
+function main2() {
   let app = element2(
-    centre2(
-      toList([style(styles)]),
-      h1(toList([]), toList([text("sadness")]))
+    main(
+      toList([]),
+      toList([canvas(toList([id("board")]))])
     )
   );
-  let $ = start2(app, "#app", void 0);
-  if (!$.isOk()) {
-    throw makeError(
-      "let_assert",
-      "proto",
-      16,
-      "main",
-      "Pattern match failed, no pattern matched the value.",
-      { value: $ }
-    );
-  }
-  return void 0;
+  return start2(app, "#app", void 0);
 }
 
 // build/.lustre/entry.mjs
-main();
+main2();
