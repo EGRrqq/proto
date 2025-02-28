@@ -13,9 +13,12 @@
 		overflow: hidden;
 	}
 
+	div#app {
+		min-height: 100dvh;
+	}
+
 	main {
 		display: flex;
-		min-height: 100dvh;
 
 		position: relative;
 	}
@@ -23,7 +26,4 @@
 @layer primitives {
 }
 @layer components {
-	canvas#board {
-		width: 100%;
-	}
 }
