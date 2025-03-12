@@ -169,13 +169,6 @@ function structurallyCompatibleObjects(a, b) {
     return false;
   return a.constructor === b.constructor;
 }
-function divideFloat(a, b) {
-  if (b === 0) {
-    return 0;
-  } else {
-    return a / b;
-  }
-}
 function makeError(variant, module, line, fn, message, extra) {
   let error = new globalThis.Error(message);
   error.gleam_error = variant;
@@ -900,24 +893,8 @@ var unequalDictSymbol = Symbol();
 
 // build/dev/javascript/gleam_stdlib/gleam_stdlib.mjs
 var Nil = void 0;
-function identity(x) {
-  return x;
-}
 function to_string(term) {
   return term.toString();
-}
-function float_to_string(float4) {
-  const string3 = float4.toString().replace("+", "");
-  if (string3.indexOf(".") >= 0) {
-    return string3;
-  } else {
-    const index3 = string3.indexOf("e");
-    if (index3 >= 0) {
-      return string3.slice(0, index3) + ".0" + string3.slice(index3);
-    } else {
-      return string3 + ".0";
-    }
-  }
 }
 var segmenter = void 0;
 function graphemes_iterator(string3) {
@@ -939,16 +916,6 @@ function pop_grapheme(string3) {
   } else {
     return new Error(Nil);
   }
-}
-function join(xs, separator) {
-  const iterator = xs[Symbol.iterator]();
-  let result = iterator.next().value || "";
-  let current = iterator.next();
-  while (!current.done) {
-    result = result + separator + current.value;
-    current = iterator.next();
-  }
-  return result;
 }
 var unicode_whitespaces = [
   " ",
@@ -972,9 +939,6 @@ var unicode_whitespaces = [
 ].join("");
 var trim_start_regex = new RegExp(`^[${unicode_whitespaces}]*`);
 var trim_end_regex = new RegExp(`[${unicode_whitespaces}]*$`);
-function round(float4) {
-  return Math.round(float4);
-}
 function new_map() {
   return Dict.new();
 }
@@ -983,30 +947,6 @@ function map_to_list(map4) {
 }
 function map_insert(key, value, map4) {
   return map4.set(key, value);
-}
-
-// build/dev/javascript/gleam_stdlib/gleam/float.mjs
-function negate(x) {
-  return -1 * x;
-}
-function round2(x) {
-  let $ = x >= 0;
-  if ($) {
-    return round(x);
-  } else {
-    return 0 - round(negate(x));
-  }
-}
-function divide(a, b) {
-  if (b === 0) {
-    return new Error(void 0);
-  } else {
-    let b$1 = b;
-    return new Ok(divideFloat(a, b$1));
-  }
-}
-function multiply(a, b) {
-  return a * b;
 }
 
 // build/dev/javascript/gleam_stdlib/gleam/dict.mjs
@@ -1213,37 +1153,6 @@ function do_handlers(loop$element, loop$handlers, loop$key) {
 }
 function handlers(element3) {
   return do_handlers(element3, new_map(), "0");
-}
-
-// build/dev/javascript/lustre/lustre/attribute.mjs
-function attribute(name, value) {
-  return new Attribute(name, identity(value), false);
-}
-function property(name, value) {
-  return new Attribute(name, identity(value), true);
-}
-function style(properties) {
-  return attribute(
-    "style",
-    fold(
-      properties,
-      "",
-      (styles, _use1) => {
-        let name$1 = _use1[0];
-        let value$1 = _use1[1];
-        return styles + name$1 + ":" + value$1 + ";";
-      }
-    )
-  );
-}
-function id(name) {
-  return attribute("id", name);
-}
-function height(val) {
-  return property("height", val);
-}
-function width(val) {
-  return property("width", val);
 }
 
 // build/dev/javascript/lustre/lustre/element.mjs
@@ -1600,8 +1509,8 @@ function lustreServerEventHandler(event) {
   return {
     tag,
     data: include.reduce(
-      (data2, property2) => {
-        const path = property2.split(".");
+      (data2, property) => {
+        const path = property.split(".");
         for (let i = 0, o = data2, e = event; i < path.length; i++) {
           if (i === path.length - 1) {
             o[path[i]] = e[path[i]];
@@ -1988,468 +1897,47 @@ function main(attrs, children2) {
   return element("main", attrs, children2);
 }
 
-// build/dev/javascript/gleam_community_colour/gleam_community/colour.mjs
-var Rgba = class extends CustomType {
-  constructor(r, g, b, a) {
-    super();
-    this.r = r;
-    this.g = g;
-    this.b = b;
-    this.a = a;
-  }
-};
-function hue_to_rgb(hue, m1, m2) {
-  let h = (() => {
-    if (hue < 0) {
-      return hue + 1;
-    } else if (hue > 1) {
-      return hue - 1;
-    } else {
-      return hue;
-    }
-  })();
-  let h_t_6 = h * 6;
-  let h_t_2 = h * 2;
-  let h_t_3 = h * 3;
-  if (h_t_6 < 1) {
-    return m1 + (m2 - m1) * h * 6;
-  } else if (h_t_2 < 1) {
-    return m2;
-  } else if (h_t_3 < 2) {
-    return m1 + (m2 - m1) * (divideFloat(2, 3) - h) * 6;
-  } else {
-    return m1;
-  }
-}
-function hsla_to_rgba(h, s, l, a) {
-  let m2 = (() => {
-    let $ = l <= 0.5;
-    if ($) {
-      return l * (s + 1);
-    } else {
-      return l + s - l * s;
-    }
-  })();
-  let m1 = l * 2 - m2;
-  let r = hue_to_rgb(h + divideFloat(1, 3), m1, m2);
-  let g = hue_to_rgb(h, m1, m2);
-  let b = hue_to_rgb(h - divideFloat(1, 3), m1, m2);
-  return [r, g, b, a];
-}
-function to_rgba(colour) {
-  if (colour instanceof Rgba) {
-    let r = colour.r;
-    let g = colour.g;
-    let b = colour.b;
-    let a = colour.a;
-    return [r, g, b, a];
-  } else {
-    let h = colour.h;
-    let s = colour.s;
-    let l = colour.l;
-    let a = colour.a;
-    return hsla_to_rgba(h, s, l, a);
-  }
-}
-function to_css_rgba_string(colour) {
-  let $ = to_rgba(colour);
-  let r = $[0];
-  let g = $[1];
-  let b = $[2];
-  let a = $[3];
-  let percent = (x) => {
-    let $1 = (() => {
-      let _pipe = x;
-      let _pipe$1 = multiply(_pipe, 1e4);
-      let _pipe$2 = round2(_pipe$1);
-      let _pipe$3 = identity(_pipe$2);
-      return divide(_pipe$3, 100);
-    })();
-    if (!$1.isOk()) {
-      throw makeError(
-        "let_assert",
-        "gleam_community/colour",
-        706,
-        "",
-        "Pattern match failed, no pattern matched the value.",
-        { value: $1 }
-      );
-    }
-    let p = $1[0];
-    return p;
-  };
-  let round_to = (x) => {
-    let $1 = (() => {
-      let _pipe = x;
-      let _pipe$1 = multiply(_pipe, 1e3);
-      let _pipe$2 = round2(_pipe$1);
-      let _pipe$3 = identity(_pipe$2);
-      return divide(_pipe$3, 1e3);
-    })();
-    if (!$1.isOk()) {
-      throw makeError(
-        "let_assert",
-        "gleam_community/colour",
-        718,
-        "",
-        "Pattern match failed, no pattern matched the value.",
-        { value: $1 }
-      );
-    }
-    let r$1 = $1[0];
-    return r$1;
-  };
-  return join(
-    toList([
-      "rgba(",
-      float_to_string(percent(r)) + "%,",
-      float_to_string(percent(g)) + "%,",
-      float_to_string(percent(b)) + "%,",
-      float_to_string(round_to(a)),
-      ")"
-    ]),
-    ""
-  );
-}
-
-// build/dev/javascript/paint/paint/internal/types.mjs
-var Blank = class extends CustomType {
-};
-var Polygon = class extends CustomType {
-  constructor(x0, closed) {
-    super();
-    this[0] = x0;
-    this.closed = closed;
-  }
-};
-var Arc = class extends CustomType {
-  constructor(radius, start3, end) {
-    super();
-    this.radius = radius;
-    this.start = start3;
-    this.end = end;
-  }
-};
-var Text2 = class extends CustomType {
-  constructor(text3, style2) {
-    super();
-    this.text = text3;
-    this.style = style2;
-  }
-};
-var Fill = class extends CustomType {
-  constructor(x0, x1) {
-    super();
-    this[0] = x0;
-    this[1] = x1;
-  }
-};
-var Stroke = class extends CustomType {
-  constructor(x0, x1) {
-    super();
-    this[0] = x0;
-    this[1] = x1;
-  }
-};
-var Translate = class extends CustomType {
-  constructor(x0, x1) {
-    super();
-    this[0] = x0;
-    this[1] = x1;
-  }
-};
-var Scale = class extends CustomType {
-  constructor(x0, x1) {
-    super();
-    this[0] = x0;
-    this[1] = x1;
-  }
-};
-var Rotate = class extends CustomType {
-  constructor(x0, x1) {
-    super();
-    this[0] = x0;
-    this[1] = x1;
-  }
-};
-var Combine = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-var NoStroke = class extends CustomType {
-};
-
-// build/dev/javascript/paint/impl_canvas_bindings.mjs
-var PaintCanvas = class extends HTMLElement {
-  // Open an issue if you are in need of any other attributes :)
-  static observedAttributes = ["width", "height", "style"];
+// build/dev/javascript/proto/canvas.ffi.mjs
+var CanvasBoard = class extends HTMLElement {
+  /** @type TObservedAttributes */
+  static observedAttributes = [];
   constructor() {
     super();
-    this.canvas = document.createElement("canvas");
-    const style2 = document.createElement("style");
-    style2.textContent = `
-      :host {
-        display: inline-block;
-      }
-    `;
-    this.shadow = this.attachShadow({ mode: "open" });
-    this.shadow.appendChild(style2);
-    this.shadow.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext("2d");
+    console.log(this, this.ELEMENT_NODE);
   }
-  // forward any given attributes to the canvas
-  attributeChangedCallback(name, _oldValue, newValue) {
-    this.canvas.setAttribute(name, newValue);
+  /** @type {ICustomElement["connectedCallback"]} */
+  connectedCallback() {
+    console.log("Custom element added to page.");
+    const shadow = this.attachShadow({ mode: "open" });
+    const canvas = document.createElement("canvas");
+    shadow.appendChild(canvas);
   }
-  set picture(value) {
-    this.ctx.reset();
-    const display = window.PAINT_STATE["display_on_rendering_context_with_default_drawing_state"];
-    display(value, this.ctx);
+  /** @type {ICustomElement["disconnectedCallback"]} */
+  disconnectedCallback() {
+    console.log("Custom element removed from page.");
   }
-  set width(value) {
-    this.canvas.width = value;
+  /** @type {ICustomElement["adoptedCallback"]} */
+  adoptedCallback() {
+    console.log("Custom element moved to new page.");
   }
-  set height(value) {
-    this.canvas.height = value;
-  }
-  get width() {
-    return this.canvas.width;
-  }
-  get height() {
-    return this.canvas.height;
+  /** @type {ICustomElement["attributeChangedCallback"]} */
+  attributeChangedCallback(name, oldValue, newValue) {
+    console.log(`Attribute ${name} has changed.`);
   }
 };
-function define_web_component() {
-  window.customElements.define("paint-canvas", PaintCanvas);
-}
-function set_global(state, id2) {
-  if (typeof window.PAINT_STATE == "undefined") {
-    window.PAINT_STATE = {};
-  }
-  window.PAINT_STATE[id2] = state;
-}
-function arc(ctx, radius, start3, end, fill, stroke) {
-  ctx.beginPath();
-  ctx.arc(0, 0, radius, start3, end);
-  if (fill) {
-    ctx.fill();
-  }
-  if (stroke) {
-    ctx.stroke();
-  }
-}
-function polygon(ctx, points, closed, fill, stroke) {
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  let started = false;
-  for (const point of points) {
-    let x = point[0];
-    let y = point[1];
-    if (started) {
-      ctx.lineTo(x, y);
-    } else {
-      ctx.moveTo(x, y);
-      started = true;
-    }
-  }
-  if (closed) {
-    ctx.closePath();
-  }
-  if (fill && closed) {
-    ctx.fill();
-  }
-  if (stroke) {
-    ctx.stroke();
-  }
-}
-function text2(ctx, text3, style2) {
-  ctx.font = style2;
-  ctx.fillText(text3, 0, 0);
-}
-function save(ctx) {
-  ctx.save();
-}
-function restore(ctx) {
-  ctx.restore();
-}
-function set_fill_colour(ctx, css_colour) {
-  ctx.fillStyle = css_colour;
-}
-function set_stroke_color(ctx, css_color) {
-  ctx.strokeStyle = css_color;
-}
-function set_line_width(ctx, width2) {
-  ctx.lineWidth = width2;
-}
-function translate(ctx, x, y) {
-  ctx.translate(x, y);
-}
-function scale(ctx, x, y) {
-  ctx.scale(x, y);
-}
-function rotate(ctx, radians) {
-  ctx.rotate(radians);
-}
-
-// build/dev/javascript/paint/paint/canvas.mjs
-var DrawingState = class extends CustomType {
-  constructor(fill, stroke) {
-    super();
-    this.fill = fill;
-    this.stroke = stroke;
-  }
-};
-function display_on_rendering_context(loop$picture, loop$ctx, loop$state) {
-  while (true) {
-    let picture = loop$picture;
-    let ctx = loop$ctx;
-    let state = loop$state;
-    if (picture instanceof Blank) {
-      return void 0;
-    } else if (picture instanceof Text2) {
-      let text3 = picture.text;
-      let properties = picture.style;
-      let size_px = properties.size_px;
-      let font_family = properties.font_family;
-      save(ctx);
-      text2(
-        ctx,
-        text3,
-        to_string(size_px) + "px " + font_family
-      );
-      return restore(ctx);
-    } else if (picture instanceof Polygon) {
-      let points = picture[0];
-      let closed = picture.closed;
-      return polygon(ctx, points, closed, state.fill, state.stroke);
-    } else if (picture instanceof Arc) {
-      let radius = picture.radius;
-      let start3 = picture.start;
-      let end = picture.end;
-      let start_radians = start3[0];
-      let end_radians = end[0];
-      return arc(
-        ctx,
-        radius,
-        start_radians,
-        end_radians,
-        state.fill,
-        state.stroke
-      );
-    } else if (picture instanceof Fill) {
-      let p = picture[0];
-      let colour = picture[1];
-      save(ctx);
-      set_fill_colour(ctx, to_css_rgba_string(colour));
-      display_on_rendering_context(
-        p,
-        ctx,
-        (() => {
-          let _record = state;
-          return new DrawingState(true, _record.stroke);
-        })()
-      );
-      return restore(ctx);
-    } else if (picture instanceof Stroke) {
-      let p = picture[0];
-      let stroke = picture[1];
-      if (stroke instanceof NoStroke) {
-        loop$picture = p;
-        loop$ctx = ctx;
-        loop$state = (() => {
-          let _record = state;
-          return new DrawingState(_record.fill, false);
-        })();
-      } else {
-        let color = stroke[0];
-        let width2 = stroke[1];
-        save(ctx);
-        set_stroke_color(ctx, to_css_rgba_string(color));
-        set_line_width(ctx, width2);
-        display_on_rendering_context(
-          p,
-          ctx,
-          (() => {
-            let _record = state;
-            return new DrawingState(_record.fill, true);
-          })()
-        );
-        return restore(ctx);
-      }
-    } else if (picture instanceof Translate) {
-      let p = picture[0];
-      let vec = picture[1];
-      let x = vec[0];
-      let y = vec[1];
-      save(ctx);
-      translate(ctx, x, y);
-      display_on_rendering_context(p, ctx, state);
-      return restore(ctx);
-    } else if (picture instanceof Scale) {
-      let p = picture[0];
-      let vec = picture[1];
-      let x = vec[0];
-      let y = vec[1];
-      save(ctx);
-      scale(ctx, x, y);
-      display_on_rendering_context(p, ctx, state);
-      return restore(ctx);
-    } else if (picture instanceof Rotate) {
-      let p = picture[0];
-      let angle = picture[1];
-      let rad = angle[0];
-      save(ctx);
-      rotate(ctx, rad);
-      display_on_rendering_context(p, ctx, state);
-      return restore(ctx);
-    } else {
-      let pictures = picture[0];
-      if (pictures.hasLength(0)) {
-        return void 0;
-      } else {
-        let p = pictures.head;
-        let ps = pictures.tail;
-        display_on_rendering_context(p, ctx, state);
-        loop$picture = new Combine(ps);
-        loop$ctx = ctx;
-        loop$state = state;
-      }
-    }
-  }
-}
-var default_drawing_state = /* @__PURE__ */ new DrawingState(false, true);
-function define_web_component2() {
-  define_web_component();
-  return set_global(
-    (picture, ctx) => {
-      return display_on_rendering_context(picture, ctx, default_drawing_state);
-    },
-    "display_on_rendering_context_with_default_drawing_state"
-  );
-}
+var canvas_init = () => customElements.define("canvas-board", CanvasBoard);
 
 // build/dev/javascript/proto/proto.mjs
 function main2() {
-  define_web_component2();
-  let board = element(
-    "paint-canvas",
-    toList([
-      id("board"),
-      width(800),
-      height(600),
-      style(toList([["background", "#eee"]]))
-    ]),
-    toList([])
-  );
+  canvas_init();
+  let board = element("canvas-board", toList([]), toList([]));
   let app = element2(main(toList([]), toList([board])));
   let $ = start2(app, "#app", void 0);
   if (!$.isOk()) {
     throw makeError(
       "let_assert",
       "proto",
-      23,
+      18,
       "main",
       "Pattern match failed, no pattern matched the value.",
       { value: $ }
