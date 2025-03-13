@@ -1960,7 +1960,7 @@ function main2() {
     throw makeError(
       "let_assert",
       "proto",
-      17,
+      14,
       "main",
       "Pattern match failed, no pattern matched the value.",
       { value: $ }
