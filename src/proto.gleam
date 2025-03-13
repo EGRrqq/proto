@@ -1,3 +1,4 @@
+import board/impl_board
 import lustre
 import lustre/attribute
 import lustre/element
@@ -8,7 +9,7 @@ import lustre/element/html
 
 // Main
 pub fn main() {
-  canvas_define()
+  impl_board.define_web_component()
 
   let board = element.element("canvas-board", [], [])
 
@@ -19,6 +20,3 @@ pub fn main() {
 
   Nil
 }
-
-@external(javascript, "./canvas.ffi.mjs", "canvas_define")
-pub fn canvas_define() -> Nil

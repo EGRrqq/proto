@@ -87,8 +87,8 @@ class CanvasBoard extends HTMLElement {
 }
 
 /**
- * initialize canvas
+ * define web component with canvas
  * @type {() => void}
  */
-export const canvas_define = () =>
+export const define_web_component = () =>
 	customElements.define("canvas-board", CanvasBoard);

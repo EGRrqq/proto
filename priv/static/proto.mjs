@@ -1948,11 +1948,11 @@ var CanvasBoard = class extends HTMLElement {
     return this.CTX;
   }
 };
-var canvas_define = () => customElements.define("canvas-board", CanvasBoard);
+var define_web_component = () => customElements.define("canvas-board", CanvasBoard);
 
 // build/dev/javascript/proto/proto.mjs
 function main2() {
-  canvas_define();
+  define_web_component();
   let board = element("canvas-board", toList([]), toList([]));
   let app = element2(main(toList([]), toList([board])));
   let $ = start2(app, "#app", void 0);
@@ -1960,7 +1960,7 @@ function main2() {
     throw makeError(
       "let_assert",
       "proto",
-      18,
+      19,
       "main",
       "Pattern match failed, no pattern matched the value.",
       { value: $ }
