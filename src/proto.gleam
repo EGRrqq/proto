@@ -8,7 +8,7 @@ import lustre/element/html
 
 // Main
 pub fn main() {
-  canvas_init()
+  canvas_define()
 
   let board = element.element("canvas-board", [], [])
 
@@ -20,5 +20,5 @@ pub fn main() {
   Nil
 }
 
-@external(javascript, "./canvas.ffi.mjs", "canvas_init")
-pub fn canvas_init() -> Nil
+@external(javascript, "./canvas.ffi.mjs", "canvas_define")
+pub fn canvas_define() -> Nil

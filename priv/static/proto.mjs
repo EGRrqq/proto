@@ -93,7 +93,7 @@ var Ok = class extends Result {
     return true;
   }
 };
-var Error = class extends Result {
+var Error2 = class extends Result {
   constructor(detail) {
     super();
     this[0] = detail;
@@ -914,7 +914,7 @@ function pop_grapheme(string3) {
   if (first2) {
     return new Ok([first2, string3.slice(first2.length)]);
   } else {
-    return new Error(Nil);
+    return new Error2(Nil);
   }
 }
 var unicode_whitespaces = [
@@ -1100,7 +1100,7 @@ var Attribute = class extends CustomType {
 };
 function attribute_to_event_handler(attribute2) {
   if (attribute2 instanceof Attribute) {
-    return new Error(void 0);
+    return new Error2(void 0);
   } else {
     let name = attribute2[0];
     let handler = attribute2[1];
@@ -1603,10 +1603,10 @@ var LustreClientApplication = class _LustreClientApplication {
    */
   static start({ init: init2, update, view }, selector, flags) {
     if (!is_browser())
-      return new Error(new NotABrowser());
+      return new Error2(new NotABrowser());
     const root = selector instanceof HTMLElement ? selector : document.querySelector(selector);
     if (!root)
-      return new Error(new ElementNotFound(selector));
+      return new Error2(new ElementNotFound(selector));
     const app = new _LustreClientApplication(root, init2(flags), update, view);
     return new Ok((action) => app.send(action));
   }
@@ -1763,7 +1763,7 @@ var LustreServerApplication = class _LustreServerApplication {
         if (!decoder)
           continue;
         const msg = decoder(attr[1]);
-        if (msg instanceof Error)
+        if (msg instanceof Error2)
           continue;
         this.#queue.push(msg);
       }
@@ -1785,7 +1785,7 @@ var LustreServerApplication = class _LustreServerApplication {
       if (!handler)
         return;
       const msg = handler(action[1]);
-      if (msg instanceof Error)
+      if (msg instanceof Error2)
         return;
       this.#queue.push(msg[0]);
       this.#tick();
@@ -1885,7 +1885,7 @@ function element2(html) {
 function start2(app, selector, flags) {
   return guard(
     !is_browser(),
-    new Error(new NotABrowser()),
+    new Error2(new NotABrowser()),
     () => {
       return start(app, selector, flags);
     }
@@ -1899,18 +1899,24 @@ function main(attrs, children2) {
 
 // build/dev/javascript/proto/canvas.ffi.mjs
 var CanvasBoard = class extends HTMLElement {
+  // variables
+  /**
+   * canvas context INIT variable
+   * @type {CanvasRenderingContext2D | null}
+   * @private */
+  CTX = null;
   /** @type TObservedAttributes */
   static observedAttributes = [];
   constructor() {
     super();
-    console.log(this, this.ELEMENT_NODE);
+    this.canvas_init();
+    console.log(this.ctx);
   }
   /** @type {ICustomElement["connectedCallback"]} */
   connectedCallback() {
-    console.log("Custom element added to page.");
+    console.log("connected");
     const shadow = this.attachShadow({ mode: "open" });
-    const canvas = document.createElement("canvas");
-    shadow.appendChild(canvas);
+    shadow.appendChild(this.ctx.canvas);
   }
   /** @type {ICustomElement["disconnectedCallback"]} */
   disconnectedCallback() {
@@ -1924,12 +1930,29 @@ var CanvasBoard = class extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     console.log(`Attribute ${name} has changed.`);
   }
+  // ---
+  /**
+   * Initialize canvas with 2d context
+   * @type {() => void}
+   * @private */
+  canvas_init = () => {
+    const canvas = document.createElement("canvas");
+    this.CTX = canvas.getContext("2d", {});
+  };
+  /**
+   * Getter for canvas context
+   * @type {ICanvasBoard["ctx"]} */
+  get ctx() {
+    if (!this.CTX)
+      throw new Error("Canvas ctx is NULL");
+    return this.CTX;
+  }
 };
-var canvas_init = () => customElements.define("canvas-board", CanvasBoard);
+var canvas_define = () => customElements.define("canvas-board", CanvasBoard);
 
 // build/dev/javascript/proto/proto.mjs
 function main2() {
-  canvas_init();
+  canvas_define();
   let board = element("canvas-board", toList([]), toList([]));
   let app = element2(main(toList([]), toList([board])));
   let $ = start2(app, "#app", void 0);
