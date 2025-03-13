@@ -9,13 +9,11 @@ import lustre/element/html
 
 // Main
 pub fn main() {
+  // define web
   impl_board.define_web_component()
-
   let board = element.element("canvas-board", [], [])
 
-  // canvas.interact
   let app = lustre.element(html.main([], [board]))
-
   let assert Ok(_) = lustre.start(app, "#app", Nil)
 
   Nil
