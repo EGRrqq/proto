@@ -1912,6 +1912,7 @@ var CanvasBoard = class extends HTMLElement {
     this.canvas_init();
     console.log(this.ctx);
   }
+  // -- WEB COMPONENT METHODS --
   /** @type {ICustomElement["connectedCallback"]} */
   connectedCallback() {
     console.log("connected");
@@ -1930,7 +1931,7 @@ var CanvasBoard = class extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     console.log(`Attribute ${name} has changed.`);
   }
-  // ---
+  // -- HELPER METHODS --
   /**
    * Initialize canvas with 2d context
    * @type {() => void}
@@ -1939,6 +1940,7 @@ var CanvasBoard = class extends HTMLElement {
     const canvas = document.createElement("canvas");
     this.CTX = canvas.getContext("2d", {});
   };
+  // -- GETTERS --
   /**
    * Getter for canvas context
    * @type {ICanvasBoard["ctx"]} */
@@ -1947,6 +1949,27 @@ var CanvasBoard = class extends HTMLElement {
       throw new Error("Canvas ctx is NULL");
     return this.CTX;
   }
+  // -- VIEW METHODS --
+  /**
+   * Clear canvas
+   * @type {() => void}
+   * @private
+   * */
+  clear = () => this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+  /**
+   * [Scaling for high resolution displays. MDN DOCS](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#scaling_for_high_resolution_displays)
+   * @type {() => void}
+   * @private
+   * */
+  scale = () => {
+    const dpr = window.devicePixelRatio;
+    const rect = this.ctx.canvas.getBoundingClientRect();
+    this.ctx.canvas.width = rect.width * dpr;
+    this.ctx.canvas.height = rect.height * dpr;
+    this.ctx.scale(dpr, dpr);
+    this.ctx.canvas.style.width = `${rect.width}px`;
+    this.ctx.canvas.style.height = `${rect.height}px`;
+  };
 };
 var define_web_component = () => customElements.define("canvas-board", CanvasBoard);
 
