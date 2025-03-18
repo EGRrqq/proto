@@ -1918,8 +1918,7 @@ var CanvasBoard = class extends HTMLElement {
     console.log("connected");
     const shadow = this.attachShadow({ mode: "open" });
     shadow.appendChild(this.ctx.canvas);
-    this.clear();
-    this.scale();
+    this.canvas_render();
     this.drawRect();
   }
   /** @type {ICustomElement["disconnectedCallback"]} */
@@ -1942,6 +1941,14 @@ var CanvasBoard = class extends HTMLElement {
   canvas_init = () => {
     const canvas = document.createElement("canvas");
     this.CTX = canvas.getContext("2d", {});
+  };
+  /**
+   * render loop, will be called inside `requestAnimationFrame`
+   * @type {() => void}
+   * @private */
+  canvas_render = () => {
+    this.clear();
+    this.scale();
   };
   // -- GETTERS --
   /**

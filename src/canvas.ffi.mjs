@@ -50,10 +50,8 @@ class CanvasBoard extends HTMLElement {
 		// append canvas to shadow dom
 		shadow.appendChild(this.ctx.canvas);
 
-		// draw loop, on each render
-		// will be inside animation frame
-		this.clear();
-		this.scale();
+		// initialize render loop
+		this.canvas_render();
 
 		// draw rectangle to check how scale works
 		this.drawRect();
@@ -84,6 +82,15 @@ class CanvasBoard extends HTMLElement {
 		const canvas = document.createElement("canvas");
 		// can pass settings in future
 		this.CTX = canvas.getContext("2d", {});
+	};
+
+	/**
+	 * render loop, will be called inside `requestAnimationFrame`
+	 * @type {() => void}
+	 * @private */
+	canvas_render = () => {
+		this.clear();
+		this.scale();
 	};
 
 	// -- GETTERS --
