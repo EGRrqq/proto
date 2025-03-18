@@ -1918,6 +1918,9 @@ var CanvasBoard = class extends HTMLElement {
     console.log("connected");
     const shadow = this.attachShadow({ mode: "open" });
     shadow.appendChild(this.ctx.canvas);
+    this.clear();
+    this.scale();
+    this.drawRect();
   }
   /** @type {ICustomElement["disconnectedCallback"]} */
   disconnectedCallback() {
@@ -1969,6 +1972,38 @@ var CanvasBoard = class extends HTMLElement {
     this.ctx.scale(dpr, dpr);
     this.ctx.canvas.style.width = `${rect.width}px`;
     this.ctx.canvas.style.height = `${rect.height}px`;
+  };
+  // -- DRAW METHODS --
+  /**
+   * Draw rectangle on the canvas
+   * @type {() => void}
+   * @private
+   * */
+  drawRect = () => {
+    const settings = {
+      fillStyle: "#007bff",
+      strokeStyle: "black",
+      style: "fill"
+    };
+    const rect = {
+      position: {
+        x: 150,
+        y: 75
+      },
+      size: {
+        width: 75,
+        height: 105
+      }
+    };
+    this.ctx.save();
+    const { position, size } = rect;
+    const halfWidth = size.width / 2;
+    const halfHeight = size.height / 2;
+    const x = position.x - halfWidth;
+    const y = position.y - halfHeight;
+    this.ctx.fillStyle = settings.fillStyle;
+    this.ctx.fillRect(x, y, size.width, size.height);
+    this.ctx.restore();
   };
 };
 var define_web_component = () => customElements.define("canvas-board", CanvasBoard);

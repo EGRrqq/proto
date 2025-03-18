@@ -49,6 +49,14 @@ class CanvasBoard extends HTMLElement {
 		const shadow = this.attachShadow({ mode: "open" });
 		// append canvas to shadow dom
 		shadow.appendChild(this.ctx.canvas);
+
+		// draw loop, on each render
+		// will be inside animation frame
+		this.clear();
+		this.scale();
+
+		// draw rectangle to check how scale works
+		this.drawRect();
 	}
 
 	/** @type {ICustomElement["disconnectedCallback"]} */
@@ -119,6 +127,43 @@ class CanvasBoard extends HTMLElement {
 		// Set the "drawn" size of the canvas
 		this.ctx.canvas.style.width = `${rect.width}px`;
 		this.ctx.canvas.style.height = `${rect.height}px`;
+	};
+
+	// -- DRAW METHODS --
+
+	/**
+	 * Draw rectangle on the canvas
+	 * @type {() => void}
+	 * @private
+	 * */
+	drawRect = () => {
+		const settings = {
+			fillStyle: "#007bff",
+			strokeStyle: "black",
+			style: "fill",
+		};
+		const rect = {
+			position: {
+				x: 150,
+				y: 75,
+			},
+			size: {
+				width: 75,
+				height: 105,
+			},
+		};
+
+		this.ctx.save();
+		const { position, size } = rect;
+		const halfWidth = size.width / 2;
+		const halfHeight = size.height / 2;
+		const x = position.x - halfWidth;
+		const y = position.y - halfHeight;
+
+		this.ctx.fillStyle = settings.fillStyle;
+		this.ctx.fillRect(x, y, size.width, size.height);
+
+		this.ctx.restore();
 	};
 }
 
