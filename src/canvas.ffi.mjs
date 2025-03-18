@@ -22,22 +22,19 @@
  * @implements {ICanvasBoard}
  */
 class CanvasBoard extends HTMLElement {
-	// variables
-	/**
-	 * canvas context INIT variable
-	 * @type {CanvasRenderingContext2D | null}
-	 * @private */
-	CTX = null;
+	// -- VARS --
 
 	/** @type TObservedAttributes */
 	static observedAttributes = [];
+
+	// -- CONSTRUCTOR --
 
 	constructor() {
 		// Always call super first in constructor
 		super();
 
 		this.canvas_init();
-		console.log(this.ctx);
+		this.css_init();
 	}
 
 	// -- WEB COMPONENT METHODS --
@@ -49,6 +46,7 @@ class CanvasBoard extends HTMLElement {
 		const shadow = this.attachShadow({ mode: "open" });
 		// append canvas to shadow dom
 		shadow.appendChild(this.ctx.canvas);
+		shadow.appendChild(this.css);
 
 		// initialize render loop
 		this.canvas_render();
@@ -80,8 +78,31 @@ class CanvasBoard extends HTMLElement {
 	 * @private */
 	canvas_init = () => {
 		const canvas = document.createElement("canvas");
-		// can pass settings in future
-		this.CTX = canvas.getContext("2d", {});
+		/**
+		 * canvas context declaration init
+		 * can pass setiings in the future
+		 * @type {CanvasRenderingContext2D | null}
+		 * @private
+		 */
+		this._ctx = canvas.getContext("2d", {});
+	};
+
+	/**
+	 * Initialize web components css styles
+	 * @type {() => void}
+	 * @private */
+	css_init = () => {
+		// add classes and ids for html elemns
+		this.ctx.canvas.id = "board";
+
+		/**
+		 * css declaration init
+		 * @type {HTMLStyleElement | null}
+		 * @private
+		 */
+		this._css = document.createElement("style");
+		this._css.textContent = /* css */ `
+		`;
 	};
 
 	/**
@@ -99,9 +120,23 @@ class CanvasBoard extends HTMLElement {
 	 * Getter for canvas context
 	 * @type {ICanvasBoard["ctx"]} */
 	get ctx() {
-		if (!this.CTX) throw new Error("Canvas ctx is NULL");
+		if (!(this._ctx instanceof CanvasRenderingContext2D))
+			throw new Error(
+				"Canvas ctx var is not equal to CanvasRenderingContext2D",
+			);
 
-		return this.CTX;
+		return this._ctx;
+	}
+
+	/**
+	 * Getter for canvas context
+	 * @type {HTMLStyleElement}
+	 * @private */
+	get css() {
+		if (!(this._css instanceof HTMLStyleElement))
+			throw new Error("Custom CSS var is not equal to HTMLStyleElement");
+
+		return this._css;
 	}
 
 	// -- VIEW METHODS --
@@ -111,8 +146,12 @@ class CanvasBoard extends HTMLElement {
 	 * @type {() => void}
 	 * @private
 	 * */
-	clear = () =>
-		this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+	clear = () => {
+		// get canvas ctx only once
+		const ctx = this.ctx;
+
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+	};
 
 	/**
 	 * [Scaling for high resolution displays. MDN DOCS](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#scaling_for_high_resolution_displays)
@@ -120,20 +159,23 @@ class CanvasBoard extends HTMLElement {
 	 * @private
 	 * */
 	scale = () => {
+		// get canvas ctx only once
+		const ctx = this.ctx;
+
 		// Get the DPR and size of the canvas
 		const dpr = window.devicePixelRatio;
-		const rect = this.ctx.canvas.getBoundingClientRect();
+		const rect = ctx.canvas.getBoundingClientRect();
 
 		// Set the "actual" size of the canvas
-		this.ctx.canvas.width = rect.width * dpr;
-		this.ctx.canvas.height = rect.height * dpr;
+		ctx.canvas.width = rect.width * dpr;
+		ctx.canvas.height = rect.height * dpr;
 
 		// Scale the context to ensure correct drawing operations
-		this.ctx.scale(dpr, dpr);
+		ctx.scale(dpr, dpr);
 
 		// Set the "drawn" size of the canvas
-		this.ctx.canvas.style.width = `${rect.width}px`;
-		this.ctx.canvas.style.height = `${rect.height}px`;
+		ctx.canvas.style.width = `${rect.width}px`;
+		ctx.canvas.style.height = `${rect.height}px`;
 	};
 
 	// -- DRAW METHODS --
@@ -161,6 +203,7 @@ class CanvasBoard extends HTMLElement {
 		};
 
 		this.ctx.save();
+
 		const { position, size } = rect;
 		const halfWidth = size.width / 2;
 		const halfHeight = size.height / 2;

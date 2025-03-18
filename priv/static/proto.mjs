@@ -1899,18 +1899,14 @@ function main(attrs, children2) {
 
 // build/dev/javascript/proto/canvas.ffi.mjs
 var CanvasBoard = class extends HTMLElement {
-  // variables
-  /**
-   * canvas context INIT variable
-   * @type {CanvasRenderingContext2D | null}
-   * @private */
-  CTX = null;
+  // -- VARS --
   /** @type TObservedAttributes */
   static observedAttributes = [];
+  // -- CONSTRUCTOR --
   constructor() {
     super();
     this.canvas_init();
-    console.log(this.ctx);
+    this.css_init();
   }
   // -- WEB COMPONENT METHODS --
   /** @type {ICustomElement["connectedCallback"]} */
@@ -1918,6 +1914,7 @@ var CanvasBoard = class extends HTMLElement {
     console.log("connected");
     const shadow = this.attachShadow({ mode: "open" });
     shadow.appendChild(this.ctx.canvas);
+    shadow.appendChild(this.css);
     this.canvas_render();
     this.drawRect();
   }
@@ -1940,7 +1937,18 @@ var CanvasBoard = class extends HTMLElement {
    * @private */
   canvas_init = () => {
     const canvas = document.createElement("canvas");
-    this.CTX = canvas.getContext("2d", {});
+    this._ctx = canvas.getContext("2d", {});
+  };
+  /**
+   * Initialize web components css styles
+   * @type {() => void}
+   * @private */
+  css_init = () => {
+    this.ctx.canvas.id = "board";
+    this._css = document.createElement("style");
+    this._css.textContent = /* css */
+    `
+		`;
   };
   /**
    * render loop, will be called inside `requestAnimationFrame`
@@ -1955,9 +1963,20 @@ var CanvasBoard = class extends HTMLElement {
    * Getter for canvas context
    * @type {ICanvasBoard["ctx"]} */
   get ctx() {
-    if (!this.CTX)
-      throw new Error("Canvas ctx is NULL");
-    return this.CTX;
+    if (!(this._ctx instanceof CanvasRenderingContext2D))
+      throw new Error(
+        "Canvas ctx var is not equal to CanvasRenderingContext2D"
+      );
+    return this._ctx;
+  }
+  /**
+   * Getter for canvas context
+   * @type {HTMLStyleElement}
+   * @private */
+  get css() {
+    if (!(this._css instanceof HTMLStyleElement))
+      throw new Error("Custom CSS var is not equal to HTMLStyleElement");
+    return this._css;
   }
   // -- VIEW METHODS --
   /**
@@ -1965,20 +1984,24 @@ var CanvasBoard = class extends HTMLElement {
    * @type {() => void}
    * @private
    * */
-  clear = () => this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+  clear = () => {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  };
   /**
    * [Scaling for high resolution displays. MDN DOCS](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#scaling_for_high_resolution_displays)
    * @type {() => void}
    * @private
    * */
   scale = () => {
+    const ctx = this.ctx;
     const dpr = window.devicePixelRatio;
-    const rect = this.ctx.canvas.getBoundingClientRect();
-    this.ctx.canvas.width = rect.width * dpr;
-    this.ctx.canvas.height = rect.height * dpr;
-    this.ctx.scale(dpr, dpr);
-    this.ctx.canvas.style.width = `${rect.width}px`;
-    this.ctx.canvas.style.height = `${rect.height}px`;
+    const rect = ctx.canvas.getBoundingClientRect();
+    ctx.canvas.width = rect.width * dpr;
+    ctx.canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.canvas.style.width = `${rect.width}px`;
+    ctx.canvas.style.height = `${rect.height}px`;
   };
   // -- DRAW METHODS --
   /**
