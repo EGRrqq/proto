@@ -97,13 +97,41 @@ class CanvasBoard extends HTMLElement {
 	 * @type {() => void}
 	 * @private */
 	canvas_menu_init = () => {
+		// create array that holds all resizer corners
+		const resizer_corners = new Array(4);
+
+		// create resizer items for each corner
+		const resizer_tl = document.createElement("div");
+		resizer_tl.className = "resizer top-left";
+		resizer_corners[0] = resizer_tl;
+
+		const resizer_tr = document.createElement("div");
+		resizer_tr.className = "resizer top-right";
+		resizer_corners[1] = resizer_tr;
+
+		const resizer_bl = document.createElement("div");
+		resizer_bl.className = "resizer bottom-left";
+		resizer_corners[2] = resizer_bl;
+
+		const resizer_br = document.createElement("div");
+		resizer_br.className = "resizer bottom-right";
+		resizer_corners[3] = resizer_br;
+
+		// create a container for corner resizer items
+		const resizers = document.createElement("div");
+		resizers.ariaHidden = "true";
+		resizers.className = "resizers";
+		// append each corner resizer item
+		resizers.append(...resizer_corners);
+
 		/**
 		 * The canvas menu variable is responsible for window operations such as closing, resizing, etc.
 		 * @type {HTMLElement | undefined}
 		 * @private
 		 */
 		this._canvas_menu = document.createElement("section");
-		this._canvas_menu.className = "board-menu";
+		this._canvas_menu.className = "board-menu resizable";
+		this._canvas_menu.appendChild(resizers);
 	};
 
 	/**
@@ -118,11 +146,60 @@ class CanvasBoard extends HTMLElement {
 		 */
 		this._css = document.createElement("style");
 		this._css.textContent = /* css */ `
-/* 		display flex is for correct canvas placement inside wrapper */
-		.board-menu {
-			display: flex;
-			border: solid;
-		}
+
+:host {
+	--bg-color: #fff;
+	--border-color: #4286f4;
+}
+
+.board-menu {
+	display: flex;
+}
+
+.resizable {
+	background: var(--bg-color);
+	position: absolute;
+	top: 100px;
+	left: 100px;
+}
+
+.resizable .resizers {
+	width: 100%;
+	height: 100%;
+	border: 3px solid var(--border-color);
+	box-sizing: border-box;
+	position: absolute;
+}
+
+.resizable .resizers .resizer {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%; /*magic to turn square into circle*/
+	background: white;
+	border: 3px solid #4286f4;
+	position: absolute;
+}
+.resizable .resizers .resizer.top-left {
+	transform: translate(-50%, -50%);
+	cursor: nwse-resize; /*resizer cursor*/
+}
+.resizable .resizers .resizer.top-right {
+	left: 100%;
+	transform: translate(-50%, -50%);
+	cursor: nesw-resize;
+}
+.resizable .resizers .resizer.bottom-left {
+	right: 100%;
+	top: 100%;
+	transform: translate(50%, -50%);
+	cursor: nesw-resize;
+}
+.resizable .resizers .resizer.bottom-right {
+	left: 100%;
+	top: 100%;
+	transform: translate(-50%, -50%);
+	cursor: nwse-resize;
+}
 		`;
 	};
 
