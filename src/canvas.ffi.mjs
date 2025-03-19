@@ -33,6 +33,8 @@ class CanvasBoard extends HTMLElement {
 		// Always call super first in constructor
 		super();
 
+		// init web-component elements
+		this.canvas_menu_init();
 		this.canvas_init();
 		this.css_init();
 	}
@@ -44,8 +46,10 @@ class CanvasBoard extends HTMLElement {
 		console.log("connected");
 		// attach shadow dom to web component
 		const shadow = this.attachShadow({ mode: "open" });
-		// append canvas to shadow dom
-		shadow.appendChild(this.ctx.canvas);
+
+		// append web-component elements to the shadow dom
+		this.canvas_menu.appendChild(this.ctx.canvas);
+		shadow.appendChild(this.canvas_menu);
 		shadow.appendChild(this.css);
 
 		// initialize render loop
@@ -78,6 +82,7 @@ class CanvasBoard extends HTMLElement {
 	 * @private */
 	canvas_init = () => {
 		const canvas = document.createElement("canvas");
+		canvas.id = "board";
 		/**
 		 * canvas context declaration init
 		 * can pass setiings in the future
@@ -88,20 +93,36 @@ class CanvasBoard extends HTMLElement {
 	};
 
 	/**
+	 * Initialize menu/wrapper for canvas
+	 * @type {() => void}
+	 * @private */
+	canvas_menu_init = () => {
+		/**
+		 * The canvas menu variable is responsible for window operations such as closing, resizing, etc.
+		 * @type {HTMLElement | undefined}
+		 * @private
+		 */
+		this._canvas_menu = document.createElement("section");
+		this._canvas_menu.className = "board-menu";
+	};
+
+	/**
 	 * Initialize web components css styles
 	 * @type {() => void}
 	 * @private */
 	css_init = () => {
-		// add classes and ids for html elemns
-		this.ctx.canvas.id = "board";
-
 		/**
 		 * css declaration init
-		 * @type {HTMLStyleElement | null}
+		 * @type {HTMLStyleElement | undefined}
 		 * @private
 		 */
 		this._css = document.createElement("style");
 		this._css.textContent = /* css */ `
+/* 		display flex is for correct canvas placement inside wrapper */
+		.board-menu {
+			display: flex;
+			border: solid;
+		}
 		`;
 	};
 
@@ -126,6 +147,18 @@ class CanvasBoard extends HTMLElement {
 			);
 
 		return this._ctx;
+	}
+
+	// TODO:
+	// - attach canvas_menu in shadow root
+	/**
+	 * Getter for canvas menu
+	 * @type {HTMLElement} */
+	get canvas_menu() {
+		if (!(this._canvas_menu instanceof HTMLElement))
+			throw new Error("canvas_menu var is not equal to HTMLElement");
+
+		return this._canvas_menu;
 	}
 
 	/**

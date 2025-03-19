@@ -1905,6 +1905,7 @@ var CanvasBoard = class extends HTMLElement {
   // -- CONSTRUCTOR --
   constructor() {
     super();
+    this.canvas_menu_init();
     this.canvas_init();
     this.css_init();
   }
@@ -1913,7 +1914,8 @@ var CanvasBoard = class extends HTMLElement {
   connectedCallback() {
     console.log("connected");
     const shadow = this.attachShadow({ mode: "open" });
-    shadow.appendChild(this.ctx.canvas);
+    this.canvas_menu.appendChild(this.ctx.canvas);
+    shadow.appendChild(this.canvas_menu);
     shadow.appendChild(this.css);
     this.canvas_render();
     this.drawRect();
@@ -1937,17 +1939,30 @@ var CanvasBoard = class extends HTMLElement {
    * @private */
   canvas_init = () => {
     const canvas = document.createElement("canvas");
+    canvas.id = "board";
     this._ctx = canvas.getContext("2d", {});
+  };
+  /**
+   * Initialize menu/wrapper for canvas
+   * @type {() => void}
+   * @private */
+  canvas_menu_init = () => {
+    this._canvas_menu = document.createElement("section");
+    this._canvas_menu.className = "board-menu";
   };
   /**
    * Initialize web components css styles
    * @type {() => void}
    * @private */
   css_init = () => {
-    this.ctx.canvas.id = "board";
     this._css = document.createElement("style");
     this._css.textContent = /* css */
     `
+/* 		display flex is for correct canvas placement inside wrapper */
+		.board-menu {
+			display: flex;
+			border: solid;
+		}
 		`;
   };
   /**
@@ -1968,6 +1983,16 @@ var CanvasBoard = class extends HTMLElement {
         "Canvas ctx var is not equal to CanvasRenderingContext2D"
       );
     return this._ctx;
+  }
+  // TODO:
+  // - attach canvas_menu in shadow root
+  /**
+   * Getter for canvas menu
+   * @type {HTMLElement} */
+  get canvas_menu() {
+    if (!(this._canvas_menu instanceof HTMLElement))
+      throw new Error("canvas_menu var is not equal to HTMLElement");
+    return this._canvas_menu;
   }
   /**
    * Getter for canvas context
