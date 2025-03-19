@@ -146,7 +146,6 @@ class CanvasBoard extends HTMLElement {
 		 */
 		this._css = document.createElement("style");
 		this._css.textContent = /* css */ `
-
 :host {
 	--bg-color: #fff;
 	--border-color: #4286f4;
@@ -180,11 +179,14 @@ class CanvasBoard extends HTMLElement {
 	position: absolute;
 }
 .resizable .resizers .resizer.top-left {
-	transform: translate(-50%, -50%);
+	left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
 	cursor: nwse-resize; /*resizer cursor*/
 }
 .resizable .resizers .resizer.top-right {
 	left: 100%;
+    top: 0;
 	transform: translate(-50%, -50%);
 	cursor: nesw-resize;
 }
